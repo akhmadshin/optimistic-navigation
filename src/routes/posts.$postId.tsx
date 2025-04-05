@@ -37,19 +37,7 @@ function PostComponent() {
   const postQuery = useQuery(postQueryOptions(postId));
   const queryClient = useQueryClient();
   const placeholderData = getPostListItem(queryClient, postId);
-
   const data = postQuery.data || placeholderData;
-  if (!data) {
-    return (
-      <WithErrorHandler
-        error={postQuery.error as any}
-        errorComponent={Route.options.errorComponent}
-        notFoundComponent={Route.options.notFoundComponent}
-      >
-        <div>Loading...</div>
-      </WithErrorHandler>
-    )
-  }
 
   return (
     <WithErrorHandler
@@ -57,10 +45,15 @@ function PostComponent() {
       errorComponent={Route.options.errorComponent}
       notFoundComponent={Route.options.notFoundComponent}
     >
-      <div className="space-y-2">
-        <h4 className="text-xl font-bold underline">{data.title}</h4>
-        <div className="text-sm">{data.body}</div>
-      </div>
+      {data ? (
+        <div className="space-y-2">
+          <h4 className="text-xl font-bold underline">{data.title}</h4>
+          <div className="text-sm">{data.body}</div>
+        </div>
+      ) : (
+        <div>Loading...</div>
+      )}
+
     </WithErrorHandler>
   )
 }

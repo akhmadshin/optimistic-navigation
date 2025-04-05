@@ -1,10 +1,9 @@
-import { ErrorComponent, createFileRoute } from '@tanstack/react-router'
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
-import { postQueryOptions } from '../utils/posts'
+import { ErrorComponent, createFileRoute, Link } from '@tanstack/react-router'
+import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
+import { getPostListItem, postQueryOptions } from '../utils/posts'
 import type { ErrorComponentProps } from '@tanstack/react-router'
 import { NotFound } from '~/components/NotFound'
 import { WithErrorHandler } from '~/components/WithErrorHandler';
-import { Link } from '~/components/Link';
 
 export const Route = createFileRoute('/posts/$postId')({
   loader: async ({ params: { postId }, context, cause }) => {
@@ -36,10 +35,19 @@ export function PostErrorComponent({ error }: ErrorComponentProps) {
 function PostComponent() {
   const { postId } = Route.useParams()
   const postQuery = typeof window === 'undefined' ? useSuspenseQuery(postQueryOptions(postId)) : useQuery(postQueryOptions(postId));
+  const queryClient = useQueryClient();
+  const placeholderData = getPostListItem(queryClient, postId);
 
-  if (!postQuery.data) {
+  const data = postQuery.data || placeholderData;
+  if (!data) {
     return (
-      <div>Loading...</div>
+      <WithErrorHandler
+        error={postQuery.error as any}
+        errorComponent={Route.options.errorComponent}
+        notFoundComponent={Route.options.notFoundComponent}
+      >
+        <div>Loading...</div>
+      </WithErrorHandler>
     )
   }
 
@@ -50,19 +58,8 @@ function PostComponent() {
       notFoundComponent={Route.options.notFoundComponent}
     >
       <div className="space-y-2">
-        <h4 className="text-xl font-bold underline">{postQuery.data.title}</h4>
-        <div className="text-sm">{postQuery.data.body}</div>
-        <Link
-          placeholderData={postQuery.data}
-          to="/posts/$postId/deep"
-          params={{
-            postId: postQuery.data.id,
-          }}
-          activeProps={{className: 'text-black font-bold'}}
-          className="block py-1 text-blue-800 hover:text-blue-600"
-        >
-          Deep View
-        </Link>
+        <h4 className="text-xl font-bold underline">{data.title}</h4>
+        <div className="text-sm">{data.body}</div>
       </div>
     </WithErrorHandler>
   )

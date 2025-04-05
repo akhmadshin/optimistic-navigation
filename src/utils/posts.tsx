@@ -1,8 +1,7 @@
-import { queryOptions } from '@tanstack/react-query'
+import { QueryClient, queryOptions } from '@tanstack/react-query'
 import { notFound } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import axios from 'redaxios'
-import { getPlaceholderData } from '~/utils/placeholderDataStore';
 
 export type PostType = {
   id: string
@@ -31,7 +30,10 @@ export const fetchPost = createServerFn({ method: 'GET' })
     console.info(`Fetching post with id ${data}...`)
     const post = await axios
       .get<PostType>(`https://jsonplaceholder.typicode.com/posts/${data}`)
-      .then((r) => r.data)
+      .then((r) => {
+        console.log('r = ', r);
+        return r.data;
+      })
       .catch((err) => {
         console.error(err)
         if (err.status === 404) {
@@ -45,7 +47,14 @@ export const fetchPost = createServerFn({ method: 'GET' })
 
 export const postQueryOptions = (postId: string) =>
   queryOptions({
-    placeholderData: getPlaceholderData(),
+    retry: 0,
     queryKey: ['post', postId],
     queryFn: () => fetchPost({ data: postId }),
   })
+
+export const getPostListItem = (queryClient: QueryClient, postId: string) => {
+  const posts = queryClient.getQueryData<Array<PostType>>(['posts']);
+  if (posts && posts.length > 0) {
+    return posts.find(post => String(post.id) === postId);
+  }
+}

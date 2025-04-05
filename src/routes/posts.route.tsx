@@ -1,7 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { Outlet, createFileRoute } from '@tanstack/react-router'
+import { Outlet, createFileRoute, Link } from '@tanstack/react-router'
 import { postsQueryOptions } from '../utils/posts'
-import { Link } from '~/components/Link';
 
 export const Route = createFileRoute('/posts')({
   loader: async ({ context }) => {
@@ -26,7 +25,6 @@ function PostsComponent() {
           return (
             <li key={post.id} className="whitespace-nowrap">
               <Link
-                placeholderData={post}
                 to="/posts/$postId"
                 params={{
                   postId: post.id,

@@ -34,7 +34,7 @@ export function PostErrorComponent({ error }: ErrorComponentProps) {
 
 function PostComponent() {
   const { postId } = Route.useParams()
-  const postQuery = typeof window === 'undefined' ? useSuspenseQuery(postQueryOptions(postId)) : useQuery(postQueryOptions(postId));
+  const postQuery = useQuery(postQueryOptions(postId));
   const queryClient = useQueryClient();
   const placeholderData = getPostListItem(queryClient, postId);
 

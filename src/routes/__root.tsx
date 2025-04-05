@@ -3,7 +3,7 @@ import {
   Link,
   Outlet,
   Scripts,
-  createRootRouteWithContext,
+  createRootRouteWithContext, useRouter,
 } from '@tanstack/react-router'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
@@ -13,6 +13,7 @@ import { DefaultCatchBoundary } from '~/components/DefaultCatchBoundary'
 import { NotFound } from '~/components/NotFound'
 import appCss from '~/styles/app.css?url'
 import { seo } from '~/utils/seo'
+import { useEffect } from 'react';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient
@@ -67,6 +68,16 @@ export const Route = createRootRouteWithContext<{
 })
 
 function RootComponent() {
+  const router = useRouter()
+
+  useEffect(() => {
+    Promise.all([
+      router.loadRouteChunk(router.routesByPath['/']),
+      router.loadRouteChunk(router.routesByPath['/posts']),
+      router.loadRouteChunk(router.routesByPath['/posts/$postId']),
+    ]).catch((err) => new Error(err));
+  }, []);
+
   return (
     <RootDocument>
       <Outlet />
